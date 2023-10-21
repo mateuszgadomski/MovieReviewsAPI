@@ -8,7 +8,9 @@ namespace MovieReviewsAPI.Entities
         public int Id { get; set; }
         public string Content { get; set; }
         public bool IsWorth { get; set; }
-        public DateTime PublicationDate { get; set; }
+
+        public string PublicationDate { get; set; }
+            = DateTime.Now.ToString("dd/MM/yyy");
 
         public int MovieId { get; set; }
         public virtual Movie Movie { get; set; }

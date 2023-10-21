@@ -1,4 +1,5 @@
 ﻿using MovieReviewsAPI.Entities;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +35,22 @@ namespace MovieReviewsAPI
             {
                 Name = "Drama",
                 Description = "In film and television, drama is a category or genre of narrative fiction (or semi-fiction) " +
-                "intended to be more serious than humorous in tone.",
+                "intended to be more serious than humorous in tone."
+            };
+
+            var reviews = new List<Review>()
+            {
+                new Review()
+                {
+                    Content = "A great movie worth seeing!",
+                    IsWorth = true,
+                },
+
+                new Review()
+                {
+                    Content = "I don't know if I liked this movie myself...",
+                    IsWorth = false,
+                },
             };
 
             var movies = new List<Movie>()
@@ -45,6 +61,7 @@ namespace MovieReviewsAPI
                     Description = "A story about a New York Mafia family. The aging Don Corleone wants to pass power to his son.",
                     Author = "Francis Ford Coppola",
                     Category = dramaCategory,
+                    Reviews = reviews
                 },
 
                 new Movie()
@@ -52,7 +69,7 @@ namespace MovieReviewsAPI
                     Title = "Forrest Gump",
                     Description = "The life story of Forrest, a low IQ boy with limb paresis who becomes a billionaire and a hero of the Vietnam War.",
                     Author = "Robert Zemeckis",
-                    Category = dramaCategory,
+                    Category = dramaCategory
                 }
             };
 
