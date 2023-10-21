@@ -35,7 +35,7 @@ namespace MovieReviewsAPI.Entities
             modelBuilder.Entity<Review>(r =>
             {
                 r.Property(r => r.Content)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasMaxLength(1000)
                 .IsRequired();
 

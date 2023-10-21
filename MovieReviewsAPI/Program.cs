@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MovieReviewsAPI;
 using MovieReviewsAPI.Entities;
+using MovieReviewsAPI.Services;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,8 @@ builder.Services.AddDbContext<MovieReviewsDbContext>
     (options => options.UseSqlServer(builder.Configuration.GetConnectionString("MovieReviewsDbConnection")));
 builder.Services.AddScoped<Seeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+builder.Services.AddScoped<IMovieService, MovieService>();
 
 var app = builder.Build();
 

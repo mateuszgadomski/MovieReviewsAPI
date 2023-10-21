@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieReviewsAPI.Entities;
 using MovieReviewsAPI.Models;
+using MovieReviewsAPI.Services;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,79 +11,54 @@ using System.Linq;
 namespace MovieReviewsAPI.Controllers
 {
     [Route("api/movie")]
+    [ApiController]
     public class MovieController : ControllerBase
     {
-        private readonly MovieReviewsDbContext _dbContext;
-        private readonly IMapper _mapper;
+        private readonly IMovieService _movieService;
 
-        public MovieController(MovieReviewsDbContext dbContext, IMapper mapper)
+        public MovieController(IMovieService movieService)
         {
-            _dbContext = dbContext;
-            _mapper = mapper;
+            _movieService = movieService;
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<MovieDto>> GetAll()
         {
-            var movies = _dbContext
-                .Movies
-                .Include(m => m.Category)
-                .Include(m => m.Reviews)
-                .ToList();
+            var movies = _movieService.GetAll();
 
-            var movieDtos = _mapper.Map<List<MovieDto>>(movies);
-
-            return Ok(movieDtos);
+            return Ok(movies);
         }
 
         [HttpGet("{id}")]
         public ActionResult<MovieDto> Get([FromRoute] int id)
         {
-            var movie = _dbContext
-                .Movies
-                .FirstOrDefault(m => m.Id == id);
+            var movie = _movieService.Get(id);
 
-            if (movie is null)
-                return NotFound();
-
-            var movieDto = _mapper.Map<MovieDto>(movie);
-
-            return Ok(movieDto);
+            return Ok(movie);
         }
 
         [HttpPost]
         public ActionResult Create([FromBody] CreateMovieDto dto)
         {
-            var category = _dbContext
-                .Categories
-                .FirstOrDefault(c => c.Name == dto.CategoryName);
+            var id = _movieService.Create(dto);
 
-            if (category is null)
-                return NotFound();
-
-            var movie = _mapper.Map<Movie>(dto);
-            movie.Category = category;
-            _dbContext.Movies.Add(movie);
-
-            _dbContext.SaveChanges();
-
-            return Created($"/api/movies/{movie.Id}", null);
+            return Created($"/api/movies/{id}", null);
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-            var movie = _dbContext
-                .Movies
-                .FirstOrDefault(m => m.Id == id);
-
-            if (movie is null)
-                return NotFound();
-
-            _dbContext.Movies.Remove(movie);
-            _dbContext.SaveChanges();
+            _movieService.Delete(id);
 
             return NoContent();
+        }
+
+        [HttpPut("{id}")]
+        public ActionResult Update([FromBody] UpdateMovieDto dto, [FromRoute] int id)
+        {
+            _movieService.Update(dto, id);
+
+            return Ok();
         }
     }
 }
