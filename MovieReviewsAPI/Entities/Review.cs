@@ -12,6 +12,9 @@ namespace MovieReviewsAPI.Entities
         public string PublicationDate { get; set; }
             = DateTime.Now.ToString("dd/MM/yyy");
 
+        public string UpdatedDate { get; set; }
+            = "Not edited";
+
         public int MovieId { get; set; }
         public virtual Movie Movie { get; set; }
     }

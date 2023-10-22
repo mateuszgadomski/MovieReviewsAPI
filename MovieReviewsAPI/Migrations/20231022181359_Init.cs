@@ -55,6 +55,7 @@ namespace MovieReviewsAPI.Migrations
                     Content = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     IsWorth = table.Column<bool>(type: "bit", nullable: false),
                     PublicationDate = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedDate = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MovieId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>

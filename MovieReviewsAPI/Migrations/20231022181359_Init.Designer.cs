@@ -11,7 +11,7 @@ using MovieReviewsAPI.Entities;
 namespace MovieReviewsAPI.Migrations
 {
     [DbContext(typeof(MovieReviewsDbContext))]
-    [Migration("20231022090422_Init")]
+    [Migration("20231022181359_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -98,6 +98,10 @@ namespace MovieReviewsAPI.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("PublicationDate")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UpdatedDate")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
