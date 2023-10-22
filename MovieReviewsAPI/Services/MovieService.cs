@@ -16,11 +16,11 @@ namespace MovieReviewsAPI.Services
 
         MovieDto GetById(int id);
 
-        int Create(CreateMovieDto dto);
+        int Create(CreateAndUpdateMovieDto dto);
 
         void Delete(int id);
 
-        void Update(UpdateMovieDto dto, int id);
+        void Update(CreateAndUpdateMovieDto dto, int id);
     }
 
     public class MovieService : IMovieService
@@ -61,7 +61,7 @@ namespace MovieReviewsAPI.Services
             return movieDto;
         }
 
-        public int Create(CreateMovieDto dto)
+        public int Create(CreateAndUpdateMovieDto dto)
         {
             var category = _dbContext
                 .Categories
@@ -98,7 +98,7 @@ namespace MovieReviewsAPI.Services
             _dbContext.SaveChanges();
         }
 
-        public void Update(UpdateMovieDto dto, int id)
+        public void Update(CreateAndUpdateMovieDto dto, int id)
         {
             var movie = _dbContext
                 .Movies

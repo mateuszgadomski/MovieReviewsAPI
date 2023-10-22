@@ -38,7 +38,7 @@ namespace MovieReviewsAPI.Controllers
         }
 
         [HttpPost]
-        public ActionResult Create([FromBody] CreateMovieDto dto)
+        public ActionResult Create([FromBody] CreateAndUpdateMovieDto dto)
         {
             var id = _movieService.Create(dto);
 
@@ -54,7 +54,7 @@ namespace MovieReviewsAPI.Controllers
         }
 
         [HttpPut("{id}")]
-        public ActionResult Update([FromBody] UpdateMovieDto dto, [FromRoute] int id)
+        public ActionResult Update([FromBody] CreateAndUpdateMovieDto dto, [FromRoute] int id)
         {
             _movieService.Update(dto, id);
 
