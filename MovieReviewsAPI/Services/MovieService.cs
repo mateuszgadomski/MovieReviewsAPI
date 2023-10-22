@@ -12,13 +12,13 @@ namespace MovieReviewsAPI.Services
 {
     public interface IMovieService
     {
+        IEnumerable<MovieDto> GetAll();
+
+        MovieDto GetById(int id);
+
         int Create(CreateMovieDto dto);
 
         void Delete(int id);
-
-        MovieDto Get(int id);
-
-        IEnumerable<MovieDto> GetAll();
 
         void Update(UpdateMovieDto dto, int id);
     }
@@ -47,14 +47,14 @@ namespace MovieReviewsAPI.Services
             return movieDtos;
         }
 
-        public MovieDto Get(int id)
+        public MovieDto GetById(int id)
         {
             var movie = _dbContext
                 .Movies
                 .FirstOrDefault(m => m.Id == id);
 
             if (movie is null)
-                throw new NotFoundException("Movie not found");
+                MovieNotFoundException();
 
             var movieDto = _mapper.Map<MovieDto>(movie);
 
@@ -68,7 +68,7 @@ namespace MovieReviewsAPI.Services
                 .FirstOrDefault(c => c.Name == dto.CategoryName);
 
             if (category is null)
-                throw new NotFoundException("Category not found");
+                CategoryNotFoundException();
 
             var movie = _dbContext
                 .Movies
@@ -92,7 +92,7 @@ namespace MovieReviewsAPI.Services
                 .FirstOrDefault(m => m.Id == id);
 
             if (movie is null)
-                throw new NotFoundException("Movie not found");
+                MovieNotFoundException();
 
             _dbContext.Movies.Remove(movie);
             _dbContext.SaveChanges();
@@ -105,14 +105,14 @@ namespace MovieReviewsAPI.Services
                 .FirstOrDefault(m => m.Id == id);
 
             if (movie is null)
-                throw new NotFoundException("Movie not found");
+                MovieNotFoundException();
 
             var category = _dbContext
                 .Categories
                 .FirstOrDefault(c => c.Name == dto.CategoryName);
 
             if (category is null)
-                throw new NotFoundException("Category not found");
+                CategoryNotFoundException();
 
             movie.Title = dto.Title;
             movie.Description = dto.Description;
@@ -120,6 +120,16 @@ namespace MovieReviewsAPI.Services
             movie.Category = category;
 
             _dbContext.SaveChanges();
+        }
+
+        private void MovieNotFoundException()
+        {
+            throw new NotFoundException("Movie not found");
+        }
+
+        private void CategoryNotFoundException()
+        {
+            throw new NotFoundException("Category not found");
         }
     }
 }

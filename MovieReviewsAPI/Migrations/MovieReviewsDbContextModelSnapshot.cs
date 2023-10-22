@@ -108,7 +108,7 @@ namespace MovieReviewsAPI.Migrations
             modelBuilder.Entity("MovieReviewsAPI.Entities.Movie", b =>
                 {
                     b.HasOne("MovieReviewsAPI.Entities.Category", "Category")
-                        .WithMany("Movies")
+                        .WithMany()
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -125,11 +125,6 @@ namespace MovieReviewsAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Movie");
-                });
-
-            modelBuilder.Entity("MovieReviewsAPI.Entities.Category", b =>
-                {
-                    b.Navigation("Movies");
                 });
 
             modelBuilder.Entity("MovieReviewsAPI.Entities.Movie", b =>

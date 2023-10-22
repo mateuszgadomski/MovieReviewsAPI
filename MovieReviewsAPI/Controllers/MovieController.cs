@@ -30,9 +30,9 @@ namespace MovieReviewsAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<MovieDto> Get([FromRoute] int id)
+        public ActionResult<MovieDto> GetById([FromRoute] int id)
         {
-            var movie = _movieService.Get(id);
+            var movie = _movieService.GetById(id);
 
             return Ok(movie);
         }
