@@ -19,6 +19,13 @@ namespace MovieReviewsAPI
         {
             if (_dbContext.Database.CanConnect())
             {
+                if (!_dbContext.Roles.Any())
+                {
+                    var roles = GetRoles();
+                    _dbContext.AddRange(roles);
+
+                    _dbContext.SaveChanges();
+                }
                 if (!_dbContext.Movies.Any() && !_dbContext.Categories.Any())
                 {
                     var movies = GetMovies();
@@ -74,6 +81,24 @@ namespace MovieReviewsAPI
             };
 
             return movies;
+        }
+
+        private IEnumerable<Role> GetRoles()
+        {
+            var roles = new List<Role>()
+            {
+                new Role()
+                {
+                    Name = "User"
+                },
+
+                new Role()
+                {
+                    Name = "Administrator"
+                }
+            };
+
+            return roles;
         }
     }
 }

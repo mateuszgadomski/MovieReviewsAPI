@@ -11,6 +11,8 @@ namespace MovieReviewsAPI.Entities
         public DbSet<Movie> Movies { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Review> Reviews { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -25,12 +27,10 @@ namespace MovieReviewsAPI.Entities
                 .IsRequired();
             });
 
-            modelBuilder.Entity<Category>(c =>
-            {
-                c.Property(c => c.Name)
+            modelBuilder.Entity<Category>()
+                .Property(c => c.Name)
                 .HasMaxLength(20)
                 .IsRequired();
-            });
 
             modelBuilder.Entity<Review>(r =>
             {
@@ -41,6 +41,19 @@ namespace MovieReviewsAPI.Entities
                 r.Property(r => r.IsWorth)
                  .IsRequired();
             });
+
+            modelBuilder.Entity<User>(u =>
+            {
+                u.Property(u => u.Email)
+                    .IsRequired();
+
+                u.Property(u => u.Login)
+                    .IsRequired();
+            });
+
+            modelBuilder.Entity<Role>()
+                .Property(r => r.Name)
+                .IsRequired();
         }
     }
 }
