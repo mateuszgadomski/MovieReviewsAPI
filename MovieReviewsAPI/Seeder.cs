@@ -1,4 +1,6 @@
-﻿using MovieReviewsAPI.Entities;
+﻿using Microsoft.AspNetCore.Identity;
+using MovieReviewsAPI.Entities;
+using MovieReviewsAPI.Exceptions;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,10 +11,12 @@ namespace MovieReviewsAPI
     public class Seeder
     {
         private readonly MovieReviewsDbContext _dbContext;
+        private readonly IPasswordHasher<User> _passwordHasher;
 
-        public Seeder(MovieReviewsDbContext dbContext)
+        public Seeder(MovieReviewsDbContext dbContext, IPasswordHasher<User> passwordHasher)
         {
             _dbContext = dbContext;
+            _passwordHasher = passwordHasher;
         }
 
         public void Seed()
@@ -30,6 +34,13 @@ namespace MovieReviewsAPI
                 {
                     var movies = GetMovies();
                     _dbContext.Movies.AddRange(movies);
+
+                    _dbContext.SaveChanges();
+                }
+                if (!_dbContext.Users.Any())
+                {
+                    var users = GetUsers();
+                    _dbContext.Users.AddRange(users);
 
                     _dbContext.SaveChanges();
                 }
@@ -99,6 +110,44 @@ namespace MovieReviewsAPI
             };
 
             return roles;
+        }
+
+        private IEnumerable<User> GetUsers()
+        {
+            var userRole = _dbContext.Roles.FirstOrDefault(r => r.Id == 1);
+            var adminRole = _dbContext.Roles.FirstOrDefault(r => r.Id == 2);
+
+            if (userRole is null || adminRole is null)
+                throw new NotFoundException("Roles not available");
+
+            var users = new List<User>()
+            {
+                new User()
+                {
+                    Login = "Admin",
+                    Email = "Admin@gmail.com",
+                    Nationality = "Poland",
+                    DateOfBirth = new DateTime(1994,01,01),
+                    Role = adminRole
+                },
+
+                new User()
+                {
+                    Login = "User",
+                    Email = "User@gmail.com",
+                    Nationality = "Poland",
+                    DateOfBirth = new DateTime(1994,01,01),
+                    Role = userRole
+                }
+            };
+
+            foreach (var user in users)
+            {
+                var hashedPassword = _passwordHasher.HashPassword(user, "tNk1xZmLZ82=");
+                user.PasswordHash = hashedPassword;
+            }
+
+            return users;
         }
     }
 }

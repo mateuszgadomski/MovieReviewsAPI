@@ -24,14 +24,12 @@ namespace MovieReviewsAPI.Services
     public class AccountService : IAccountService
     {
         private readonly MovieReviewsDbContext _dbContext;
-        private readonly IMapper _mapper;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AuthenticationSettings _authenticationSettings;
 
-        public AccountService(MovieReviewsDbContext dbContext, IMapper mapper, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings)
+        public AccountService(MovieReviewsDbContext dbContext, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings)
         {
             _dbContext = dbContext;
-            _mapper = mapper;
             _passwordHasher = passwordHasher;
             _authenticationSettings = authenticationSettings;
         }

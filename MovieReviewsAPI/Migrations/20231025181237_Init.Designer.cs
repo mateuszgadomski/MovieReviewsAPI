@@ -12,7 +12,7 @@ using MovieReviewsAPI.Entities;
 namespace MovieReviewsAPI.Migrations
 {
     [DbContext(typeof(MovieReviewsDbContext))]
-    [Migration("20231024165454_Init")]
+    [Migration("20231025181237_Init")]
     partial class Init
     {
         /// <inheritdoc />
