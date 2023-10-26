@@ -1,14 +1,17 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieReviewsAPI.Entities;
 using MovieReviewsAPI.Models;
 using MovieReviewsAPI.Services;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace MovieReviewsAPI.Controllers
 {
     [Route("api/review")]
     [ApiController]
+    [Authorize]
     public class ReviewController : ControllerBase
     {
         private readonly IReviewService _reviewService;
@@ -37,6 +40,7 @@ namespace MovieReviewsAPI.Controllers
         [HttpPost]
         public ActionResult Create([FromBody] CreateReviewDto dto)
         {
+            var userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
             int id = _reviewService.Create(dto);
 
             return Created($"/api/reviews/{id}", null);

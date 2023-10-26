@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using MovieReviewsAPI.Authorization;
 using MovieReviewsAPI.Entities;
 using MovieReviewsAPI.Exceptions;
 using MovieReviewsAPI.Models;
@@ -7,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 
 namespace MovieReviewsAPI.Services
 {
@@ -27,11 +30,15 @@ namespace MovieReviewsAPI.Services
     {
         private readonly MovieReviewsDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public ReviewService(MovieReviewsDbContext context, IMapper mapper)
+        public ReviewService(MovieReviewsDbContext context, IMapper mapper, IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbContext = context;
             _mapper = mapper;
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public IEnumerable<ReviewDto> GetAll()
@@ -69,6 +76,7 @@ namespace MovieReviewsAPI.Services
 
             var newReview = _mapper.Map<Review>(dto);
             newReview.MovieId = movie.Id;
+            newReview.CreatedById = _userContextService.GetUserId;
             _dbContext.Reviews.Add(newReview);
             _dbContext.SaveChanges();
 
@@ -84,6 +92,9 @@ namespace MovieReviewsAPI.Services
             if (review is null)
                 ReviewNotFoundException();
 
+            var authorizationResult = _authorizationService.AuthorizeAsync
+                (_userContextService.User, review, new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+
             _dbContext.Reviews.Remove(review);
             _dbContext.SaveChanges();
         }
@@ -96,6 +107,14 @@ namespace MovieReviewsAPI.Services
 
             if (review is null)
                 ReviewNotFoundException();
+
+            var authorizationResult = _authorizationService.AuthorizeAsync
+                (_userContextService.User, review, new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
 
             review.Content = dto.Content;
             review.IsWorth = dto.IsWorth;

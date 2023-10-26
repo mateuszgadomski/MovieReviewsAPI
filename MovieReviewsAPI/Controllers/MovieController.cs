@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieReviewsAPI.Entities;
@@ -12,6 +13,7 @@ namespace MovieReviewsAPI.Controllers
 {
     [Route("api/movie")]
     [ApiController]
+    [Authorize]
     public class MovieController : ControllerBase
     {
         private readonly IMovieService _movieService;
@@ -38,6 +40,7 @@ namespace MovieReviewsAPI.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "AtleastReviews")]
         public ActionResult Create([FromBody] CreateAndUpdateMovieDto dto)
         {
             var id = _movieService.Create(dto);

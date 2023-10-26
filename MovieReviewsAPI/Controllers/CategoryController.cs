@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using MovieReviewsAPI.Entities;
 using MovieReviewsAPI.Models;
 using MovieReviewsAPI.Services;
@@ -8,6 +9,7 @@ namespace MovieReviewsAPI.Controllers
 {
     [Route("api/category")]
     [ApiController]
+    [Authorize(Roles = "Administrator")]
     public class CategoryController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
@@ -18,6 +20,7 @@ namespace MovieReviewsAPI.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public ActionResult<IEnumerable<CategoryDto>> GetAll()
         {
             var categories = _categoryService.GetAll();
@@ -26,6 +29,7 @@ namespace MovieReviewsAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         public ActionResult<CategoryDto> GetById([FromRoute] int id)
         {
             var category = _categoryService.GetById(id);

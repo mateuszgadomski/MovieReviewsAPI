@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MovieReviewsAPI.Interfaces;
+using System.Collections.Generic;
 
 namespace MovieReviewsAPI.Entities
 {
@@ -8,6 +9,9 @@ namespace MovieReviewsAPI.Entities
         public string Title { get; set; }
         public string Description { get; set; }
         public string Author { get; set; }
+
+        public int? CreatedById { get; set; }
+        public virtual User CreatedBy { get; set; }
 
         public int CategoryId { get; set; }
         public virtual Category Category { get; set; }

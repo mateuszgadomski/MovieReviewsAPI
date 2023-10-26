@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MovieReviewsAPI.Authorization;
 using MovieReviewsAPI.Entities;
 using MovieReviewsAPI.Exceptions;
 using MovieReviewsAPI.Models;
@@ -27,11 +29,15 @@ namespace MovieReviewsAPI.Services
     {
         private readonly MovieReviewsDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public MovieService(MovieReviewsDbContext dbContext, IMapper mapper)
+        public MovieService(MovieReviewsDbContext dbContext, IMapper mapper, IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public IEnumerable<MovieDto> GetAll()
@@ -79,6 +85,7 @@ namespace MovieReviewsAPI.Services
 
             var newMovie = _mapper.Map<Movie>(dto);
             newMovie.Category = category;
+            newMovie.CreatedById = _userContextService.GetUserId;
             _dbContext.Movies.Add(newMovie);
             _dbContext.SaveChanges();
 
@@ -93,6 +100,14 @@ namespace MovieReviewsAPI.Services
 
             if (movie is null)
                 MovieNotFoundException();
+
+            var authorizationResult = _authorizationService.AuthorizeAsync
+                (_userContextService.User, movie, new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
 
             _dbContext.Movies.Remove(movie);
             _dbContext.SaveChanges();
@@ -113,6 +128,14 @@ namespace MovieReviewsAPI.Services
 
             if (category is null)
                 CategoryNotFoundException();
+
+            var authorizationResult = _authorizationService.AuthorizeAsync
+                (_userContextService.User, movie, new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
 
             movie.Title = dto.Title;
             movie.Description = dto.Description;

@@ -12,6 +12,7 @@ namespace MovieReviewsAPI.Entities
         public int LastName { get; set; }
         public DateTime? DateOfBirth { get; set; }
         public string Nationality { get; set; }
+        public int ReviewCount { get; set; }
 
         public int RoleId { get; set; } = 1;
         public virtual Role Role { get; set; }

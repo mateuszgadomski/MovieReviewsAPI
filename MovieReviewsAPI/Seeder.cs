@@ -128,6 +128,7 @@ namespace MovieReviewsAPI
                     Email = "Admin@gmail.com",
                     Nationality = "Poland",
                     DateOfBirth = new DateTime(1994,01,01),
+                    ReviewCount = 20,
                     Role = adminRole
                 },
 

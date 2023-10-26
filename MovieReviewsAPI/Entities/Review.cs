@@ -15,6 +15,9 @@ namespace MovieReviewsAPI.Entities
         public string UpdatedDate { get; set; }
             = "Not edited";
 
+        public int? CreatedById { get; set; }
+        public virtual User CreatedBy { get; set; }
+
         public int MovieId { get; set; }
         public virtual Movie Movie { get; set; }
     }

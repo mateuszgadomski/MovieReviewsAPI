@@ -17,6 +17,7 @@ using MovieReviewsAPI.Models.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using MovieReviewsAPI.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -44,9 +45,12 @@ builder.Services.AddAuthentication(option =>
 
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy("AtleastReviews", builder => builder.AddRequirements(new AtleastReviewsRequirement(5)));
 });
 
 // Add services to the container.
+builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, MinimumReviewsRequirementHandler>();
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 
@@ -66,6 +70,9 @@ builder.Services.AddScoped<IAccountService, AccountService>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
+
+builder.Services.AddScoped<IUserContextService, UserContextService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
