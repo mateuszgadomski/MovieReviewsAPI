@@ -101,12 +101,13 @@ namespace MovieReviewsAPI.Services
             if (movie is null)
                 MovieNotFoundException();
 
-            var authorizationResult = _authorizationService.AuthorizeAsync
-                (_userContextService.User, movie, new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
-
-            if (!authorizationResult.Succeeded)
+            if (!_userContextService.IsAdministrator)
             {
-                throw new ForbidException();
+                var authorizationResult = _authorizationService.AuthorizeAsync
+                    (_userContextService.User, movie, new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+
+                if (!authorizationResult.Succeeded)
+                    throw new ForbidException();
             }
 
             _dbContext.Movies.Remove(movie);
@@ -129,12 +130,15 @@ namespace MovieReviewsAPI.Services
             if (category is null)
                 CategoryNotFoundException();
 
-            var authorizationResult = _authorizationService.AuthorizeAsync
-                (_userContextService.User, movie, new ResourceOperationRequirement(ResourceOperation.Update)).Result;
-
-            if (!authorizationResult.Succeeded)
+            if (!_userContextService.IsAdministrator)
             {
-                throw new ForbidException();
+                var authorizationResult = _authorizationService.AuthorizeAsync
+                    (_userContextService.User, movie, new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+                if (!authorizationResult.Succeeded)
+                {
+                    throw new ForbidException();
+                }
             }
 
             movie.Title = dto.Title;
@@ -145,14 +149,8 @@ namespace MovieReviewsAPI.Services
             _dbContext.SaveChanges();
         }
 
-        private void MovieNotFoundException()
-        {
-            throw new NotFoundException("Movie not found");
-        }
+        private void MovieNotFoundException() => throw new NotFoundException("Movie not found");
 
-        private void CategoryNotFoundException()
-        {
-            throw new NotFoundException("Category not found");
-        }
+        private void CategoryNotFoundException() => throw new NotFoundException("Category not found");
     }
 }

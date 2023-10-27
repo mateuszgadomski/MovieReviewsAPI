@@ -1,9 +1,10 @@
-﻿using System;
+﻿using MovieReviewsAPI.Interfaces;
+using System;
 using System.Collections.Generic;
 
 namespace MovieReviewsAPI.Entities
 {
-    public class Review
+    public class Review : IEditableByOwner
     {
         public int Id { get; set; }
         public string Content { get; set; }

@@ -92,8 +92,14 @@ namespace MovieReviewsAPI.Services
             if (review is null)
                 ReviewNotFoundException();
 
-            var authorizationResult = _authorizationService.AuthorizeAsync
-                (_userContextService.User, review, new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+            if (!_userContextService.IsAdministrator)
+            {
+                var authorizationResult = _authorizationService.AuthorizeAsync
+                    (_userContextService.User, review, new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+
+                if (!authorizationResult.Succeeded)
+                    throw new ForbidException();
+            }
 
             _dbContext.Reviews.Remove(review);
             _dbContext.SaveChanges();
@@ -108,12 +114,15 @@ namespace MovieReviewsAPI.Services
             if (review is null)
                 ReviewNotFoundException();
 
-            var authorizationResult = _authorizationService.AuthorizeAsync
-                (_userContextService.User, review, new ResourceOperationRequirement(ResourceOperation.Update)).Result;
-
-            if (!authorizationResult.Succeeded)
+            if (!_userContextService.IsAdministrator)
             {
-                throw new ForbidException();
+                var authorizationResult = _authorizationService.AuthorizeAsync
+                    (_userContextService.User, review, new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+                if (!authorizationResult.Succeeded)
+                {
+                    throw new ForbidException();
+                }
             }
 
             review.Content = dto.Content;

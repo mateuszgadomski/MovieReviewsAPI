@@ -5,8 +5,10 @@ namespace MovieReviewsAPI.Services
 {
     public interface IUserContextService
     {
-        int? GetUserId { get; }
         ClaimsPrincipal User { get; }
+        int? GetUserId { get; }
+        public string? GetRoleName { get; }
+        public bool IsAdministrator { get; }
     }
 
     public class UserContextService : IUserContextService
@@ -22,5 +24,10 @@ namespace MovieReviewsAPI.Services
 
         public int? GetUserId =>
             User is null ? null : (int?)int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+
+        public string? GetRoleName =>
+            User is null ? null : User.FindFirst(c => c.Type == ClaimTypes.Role).Value.ToString();
+
+        public bool IsAdministrator => GetRoleName == "Administrator";
     }
 }
