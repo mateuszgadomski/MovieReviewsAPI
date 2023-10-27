@@ -74,9 +74,23 @@ builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("FrontEndClient", b =>
+    {
+        b.AllowAnyMethod()
+               .AllowAnyHeader()
+               .WithOrigins(builder.Configuration["AllowedOrigins"]);
+    });
+});
+
 var app = builder.Build();
 
 var scope = app.Services.CreateScope();
+
+app.UseCors("FrontEndClient");
+app.UseResponseCaching();
+
 var seeder = scope.ServiceProvider.GetRequiredService<Seeder>();
 seeder.Seed();
 
