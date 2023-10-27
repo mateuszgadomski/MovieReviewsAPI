@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using MovieReviewsAPI.Entities;
 using MovieReviewsAPI.Exceptions;
@@ -26,12 +27,15 @@ namespace MovieReviewsAPI.Services
         private readonly MovieReviewsDbContext _dbContext;
         private readonly IPasswordHasher<User> _passwordHasher;
         private readonly AuthenticationSettings _authenticationSettings;
+        private readonly ILogger<AccountService> _logger;
 
-        public AccountService(MovieReviewsDbContext dbContext, IPasswordHasher<User> passwordHasher, AuthenticationSettings authenticationSettings)
+        public AccountService(MovieReviewsDbContext dbContext, IPasswordHasher<User> passwordHasher,
+            AuthenticationSettings authenticationSettings, ILogger<AccountService> logger)
         {
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
             _authenticationSettings = authenticationSettings;
+            _logger = logger;
         }
 
         public void RegisterUser(RegisterUserDto dto)
@@ -46,6 +50,8 @@ namespace MovieReviewsAPI.Services
 
             var hashedPassword = _passwordHasher.HashPassword(newUser, dto.Password);
             newUser.PasswordHash = hashedPassword;
+
+            _logger.LogInformation($"User with email: {newUser.Email} has been registered");
 
             _dbContext.Users.Add(newUser);
             _dbContext.SaveChanges();

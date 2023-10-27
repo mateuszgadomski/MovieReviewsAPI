@@ -18,8 +18,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MovieReviewsAPI.Authorization;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// NLog: Setup NLog for Dependency injection
+builder.Logging.ClearProviders();
+builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Trace);
+builder.Host.UseNLog();
 
 var authenticationSettings = new AuthenticationSettings();
 
@@ -79,8 +85,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontEndClient", b =>
     {
         b.AllowAnyMethod()
-               .AllowAnyHeader()
-               .WithOrigins(builder.Configuration["AllowedOrigins"]);
+        .AllowAnyHeader()
+        .WithOrigins(builder.Configuration["AllowedOrigins"]);
     });
 });
 
