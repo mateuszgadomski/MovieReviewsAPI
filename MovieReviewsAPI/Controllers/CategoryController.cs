@@ -21,9 +21,9 @@ namespace MovieReviewsAPI.Controllers
 
         [HttpGet]
         [Authorize]
-        public ActionResult<IEnumerable<CategoryDto>> GetAll()
+        public ActionResult<PagedResult<CategoryDto>> GetAll([FromQuery] SearchQuery query)
         {
-            var categories = _categoryService.GetAll();
+            var categories = _categoryService.GetAll(query);
 
             return Ok(categories);
         }

@@ -12,8 +12,8 @@ using MovieReviewsAPI.Entities;
 namespace MovieReviewsAPI.Migrations
 {
     [DbContext(typeof(MovieReviewsDbContext))]
-    [Migration("20231026174716_ReviewAndMovieUpdate")]
-    partial class ReviewAndMovieUpdate
+    [Migration("20231029110257_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,9 @@ namespace MovieReviewsAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("CreatedById")
+                        .HasColumnType("int");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -43,6 +46,8 @@ namespace MovieReviewsAPI.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedById");
 
                     b.ToTable("Categories");
                 });
@@ -186,10 +191,19 @@ namespace MovieReviewsAPI.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("MovieReviewsAPI.Entities.Category", b =>
+                {
+                    b.HasOne("MovieReviewsAPI.Entities.User", "CreatedBy")
+                        .WithMany()
+                        .HasForeignKey("CreatedById");
+
+                    b.Navigation("CreatedBy");
+                });
+
             modelBuilder.Entity("MovieReviewsAPI.Entities.Movie", b =>
                 {
                     b.HasOne("MovieReviewsAPI.Entities.Category", "Category")
-                        .WithMany()
+                        .WithMany("Movies")
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -229,6 +243,11 @@ namespace MovieReviewsAPI.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
+                });
+
+            modelBuilder.Entity("MovieReviewsAPI.Entities.Category", b =>
+                {
+                    b.Navigation("Movies");
                 });
 
             modelBuilder.Entity("MovieReviewsAPI.Entities.Movie", b =>

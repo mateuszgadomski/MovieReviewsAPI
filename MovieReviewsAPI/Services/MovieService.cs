@@ -9,12 +9,13 @@ using MovieReviewsAPI.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace MovieReviewsAPI.Services
 {
     public interface IMovieService
     {
-        IEnumerable<MovieDto> GetAll();
+        PagedResult<MovieDto> GetAll([FromQuery] SearchQuery query);
 
         MovieDto GetById(int id);
 
@@ -40,17 +41,44 @@ namespace MovieReviewsAPI.Services
             _userContextService = userContextService;
         }
 
-        public IEnumerable<MovieDto> GetAll()
+        public PagedResult<MovieDto> GetAll([FromQuery] SearchQuery query)
         {
-            var movies = _dbContext
+            var baseQuery = _dbContext
                 .Movies
                 .Include(m => m.Category)
                 .Include(m => m.Reviews)
+                 .Where(m => query.SearchPhrase == null || m.Title.ToLower().Contains(query.SearchPhrase.ToLower())
+                || m.Description.ToLower().Contains(query.SearchPhrase.ToLower()));
+
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Movie, object>>>
+                {
+                    {nameof(Movie.Title), m => m.Title },
+                    {nameof(Movie.Description), m => m.Description },
+                    {nameof(Movie.Author), m => m.Author },
+                    {nameof(Movie.Category.Name), m => m.Category.Name },
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+
+            var movies = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
                 .ToList();
+
+            var totalItemsCount = baseQuery.Count();
 
             var movieDtos = _mapper.Map<List<MovieDto>>(movies);
 
-            return movieDtos;
+            var result = new PagedResult<MovieDto>(movieDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public MovieDto GetById(int id)

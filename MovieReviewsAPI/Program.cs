@@ -20,6 +20,7 @@ using System.Text;
 using MovieReviewsAPI.Authorization;
 using NLog.Web;
 using MovieReviewsAPI.Middleware;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,7 +59,8 @@ builder.Services.AddAuthorization(options =>
 // Add services to the container.
 builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, MinimumReviewsRequirementHandler>();
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(option =>
+option.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddFluentValidationAutoValidation();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -78,6 +80,7 @@ builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
+builder.Services.AddScoped<IValidator<SearchQuery>, SearchQueryValidator>();
 
 builder.Services.AddScoped<IUserContextService, UserContextService>();
 builder.Services.AddHttpContextAccessor();

@@ -8,7 +8,7 @@ namespace MovieReviewsAPI.Middleware
 {
     public class ErrorHandlingMiddleware : IMiddleware
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<ErrorHandlingMiddleware> _logger;
 
         public ErrorHandlingMiddleware(ILogger<ErrorHandlingMiddleware> logger)
         {
@@ -23,16 +23,22 @@ namespace MovieReviewsAPI.Middleware
             }
             catch (BadRequestException badRequestException)
             {
+                _logger.LogError(badRequestException, badRequestException.Message);
+
                 context.Response.StatusCode = 400;
                 await context.Response.WriteAsync(badRequestException.Message);
             }
             catch (ForbidException forbidException)
             {
+                _logger.LogError(forbidException, forbidException.Message);
+
                 context.Response.StatusCode = 403;
                 await context.Response.WriteAsync(forbidException.Message);
             }
             catch (NotFoundException notFoundException)
             {
+                _logger.LogError(notFoundException, notFoundException.Message);
+
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync(notFoundException.Message);
             }

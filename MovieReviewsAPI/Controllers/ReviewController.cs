@@ -22,9 +22,10 @@ namespace MovieReviewsAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<ReviewDto>> GetAll()
+        [AllowAnonymous]
+        public ActionResult<PagedResult<ReviewDto>> GetAll([FromQuery] SearchQuery query)
         {
-            var reviews = _reviewService.GetAll();
+            var reviews = _reviewService.GetAll(query);
 
             return Ok(reviews);
         }

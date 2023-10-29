@@ -12,20 +12,6 @@ namespace MovieReviewsAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Categories",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Roles",
                 columns: table => new
                 {
@@ -36,28 +22,6 @@ namespace MovieReviewsAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Movies",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Author = table.Column<string>(type: "nvarchar(55)", maxLength: 55, nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Movies", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Movies_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,6 +52,54 @@ namespace MovieReviewsAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedById = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Categories_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Movies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Author = table.Column<string>(type: "nvarchar(55)", maxLength: 55, nullable: false),
+                    CreatedById = table.Column<int>(type: "int", nullable: true),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Movies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Movies_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Movies_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Reviews",
                 columns: table => new
                 {
@@ -97,6 +109,7 @@ namespace MovieReviewsAPI.Migrations
                     IsWorth = table.Column<bool>(type: "bit", nullable: false),
                     PublicationDate = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UpdatedDate = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedById = table.Column<int>(type: "int", nullable: true),
                     MovieId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
@@ -108,12 +121,32 @@ namespace MovieReviewsAPI.Migrations
                         principalTable: "Movies",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Reviews_Users_CreatedById",
+                        column: x => x.CreatedById,
+                        principalTable: "Users",
+                        principalColumn: "Id");
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Categories_CreatedById",
+                table: "Categories",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Movies_CategoryId",
                 table: "Movies",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Movies_CreatedById",
+                table: "Movies",
+                column: "CreatedById");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reviews_CreatedById",
+                table: "Reviews",
+                column: "CreatedById");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Reviews_MovieId",
@@ -133,16 +166,16 @@ namespace MovieReviewsAPI.Migrations
                 name: "Reviews");
 
             migrationBuilder.DropTable(
-                name: "Users");
-
-            migrationBuilder.DropTable(
                 name: "Movies");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Categories");
 
             migrationBuilder.DropTable(
-                name: "Categories");
+                name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
         }
     }
 }

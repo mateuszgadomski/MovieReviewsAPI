@@ -1,17 +1,22 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MovieReviewsAPI.Entities;
 using MovieReviewsAPI.Exceptions;
+using MovieReviewsAPI.Middleware;
 using MovieReviewsAPI.Models;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace MovieReviewsAPI.Services
 {
     public interface ICategoryService
     {
-        IEnumerable<CategoryDto> GetAll();
+        PagedResult<CategoryDto> GetAll([FromQuery] SearchQuery query);
 
         CategoryDto GetById(int id);
 
@@ -26,22 +31,49 @@ namespace MovieReviewsAPI.Services
     {
         private readonly MovieReviewsDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IUserContextService _userContextService;
 
-        public CategoryService(MovieReviewsDbContext dbContext, IMapper mapper)
+        public CategoryService(MovieReviewsDbContext dbContext, IMapper mapper, IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _userContextService = userContextService;
         }
 
-        public IEnumerable<CategoryDto> GetAll()
+        public PagedResult<CategoryDto> GetAll([FromQuery] SearchQuery query)
         {
-            var categories = _dbContext
+            var baseQuery = _dbContext
                 .Categories
+                .Where(c => query.SearchPhrase == null || c.Name.ToLower().Contains(query.SearchPhrase.ToLower())
+                || c.Description.ToLower().Contains(query.SearchPhrase.ToLower()));
+
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Category, object>>>
+                {
+                    {nameof(Category.Name), c => c.Name },
+                    {nameof(Category.Description), c => c.Description },
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+
+            var categories = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
                 .ToList();
+
+            var totalItemsCount = baseQuery.Count();
 
             var categorieDtos = _mapper.Map<List<CategoryDto>>(categories);
 
-            return categorieDtos;
+            var result = new PagedResult<CategoryDto>(categorieDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public CategoryDto GetById(int id)
@@ -68,6 +100,7 @@ namespace MovieReviewsAPI.Services
                 throw new BadRequestException("This category is now available");
 
             var newCategory = _mapper.Map<Category>(dto);
+            newCategory.CreatedById = _userContextService.GetUserId;
             _dbContext.Categories.Add(newCategory);
             _dbContext.SaveChanges();
 

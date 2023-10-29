@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieReviewsAPI.Authorization;
 using MovieReviewsAPI.Entities;
@@ -9,13 +10,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace MovieReviewsAPI.Services
 {
     public interface IReviewService
     {
-        IEnumerable<ReviewDto> GetAll();
+        PagedResult<ReviewDto> GetAll([FromQuery] SearchQuery query);
 
         ReviewDto GetById(int id);
 
@@ -41,16 +43,41 @@ namespace MovieReviewsAPI.Services
             _userContextService = userContextService;
         }
 
-        public IEnumerable<ReviewDto> GetAll()
+        public PagedResult<ReviewDto> GetAll([FromQuery] SearchQuery query)
         {
-            var reviews = _dbContext
+            var baseQuery = _dbContext
                 .Reviews
                 .Include(r => r.Movie)
+                 .Where(r => query.SearchPhrase == null || r.IsWorth.ToString().ToLower().Contains(query.SearchPhrase.ToLower())
+                || r.CreatedBy.Login.ToLower().Contains(query.SearchPhrase.ToLower()));
+
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<Review, object>>>
+                {
+                    {nameof(Review.IsWorth), r => r.IsWorth },
+                    {nameof(Review.CreatedBy.Login), r => r.CreatedBy.Login },
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+
+            var reviews = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
                 .ToList();
+
+            var totalItemsCount = baseQuery.Count();
 
             var reviewDtos = _mapper.Map<List<ReviewDto>>(reviews);
 
-            return reviewDtos;
+            var result = new PagedResult<ReviewDto>(reviewDtos, totalItemsCount, query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public ReviewDto GetById(int id)
